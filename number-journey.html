@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>رحلة الأعداد</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;800&display=swap">
+<style>
+:root{--bg:#eaf6ff;--card:#fff;--ink:#1d2b64;--sun:#ffc83d;--sky:#d6ecff;--ok:#1f9d6b;--okbg:#dcf5ea;--bad:#d6393f;--badbg:#ffe3e4;--line:#c4d9f0;--mute:#5a6a9a;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1936;--card:#192650;--ink:#eef3ff;--sky:#24366b;--ok:#3ccf91;--okbg:#14413a;--bad:#ff7a7f;--badbg:#4a2330;--line:#2f4079;--mute:#9fb0e0;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0f1936;--card:#192650;--ink:#eef3ff;--sky:#24366b;--ok:#3ccf91;--okbg:#14413a;--bad:#ff7a7f;--badbg:#4a2330;--line:#2f4079;--mute:#9fb0e0;color-scheme:dark}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Cairo","Segoe UI",Tahoma,Arial,sans-serif;font-size:17px;line-height:1.6}
+main{max-width:480px;margin:0 auto;padding:18px 16px 28px;min-height:100%}
+h1{font-size:2.1rem;font-weight:800;margin:8px 0 2px;line-height:1.25}
+h2{font-size:1.25rem;font-weight:800;margin:0 0 10px}
+p{margin:0 0 12px;color:var(--mute)}
+.card{background:var(--card);border:2px solid var(--line);border-radius:20px;padding:18px;margin-bottom:14px}
+button{font:inherit;color:inherit;cursor:pointer;border:2px solid var(--line);background:var(--card);border-radius:16px;padding:14px 16px;min-height:56px;width:100%;font-weight:800;text-align:center}
+button:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+button:active{transform:scale(.98)}
+.lv{display:flex;flex-direction:column;gap:10px;margin-top:6px}
+.lv button{display:flex;justify-content:space-between;align-items:center}
+.lv small{font-weight:500;color:var(--mute)}
+.go{background:var(--sun);border-color:var(--sun);color:#1d2b64}
+.bar{display:flex;gap:5px;margin-bottom:14px}
+.bar i{flex:1;height:10px;border-radius:6px;background:var(--line)}
+.bar i.on{background:var(--ok)}.bar i.off{background:var(--bad)}.bar i.cur{background:var(--sun)}
+.top{display:flex;justify-content:space-between;color:var(--mute);font-weight:800;margin-bottom:6px}
+.q{font-size:1.15rem;font-weight:800;margin-bottom:10px}
+.nums{display:flex;gap:12px;justify-content:center;direction:ltr;margin:6px 0 2px}
+.nums b{font-size:2.6rem;min-width:92px;text-align:center;border-radius:18px;padding:4px 10px;background:var(--sky)}
+.nums.t b{min-width:64px;font-size:2rem}
+.nums b:first-child{background:var(--sun);color:#1d2b64}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.opts button{font-size:1.7rem;min-height:68px;direction:ltr}
+.opts button.right{background:var(--okbg);border-color:var(--ok);color:var(--ok)}
+.opts button.wrong{background:var(--badbg);border-color:var(--bad);color:var(--bad)}
+.opts button:disabled{cursor:default;opacity:1}
+.fb{border-radius:16px;padding:14px 16px;margin-bottom:14px;font-weight:500}
+.fb.ok{background:var(--okbg);border:2px solid var(--ok)}
+.fb.no{background:var(--badbg);border:2px solid var(--bad)}
+.fb strong{display:block;font-weight:800;font-size:1.1rem;margin-bottom:4px}
+.fb div{direction:rtl;margin-top:2px}
+.fb span{direction:ltr;unicode-bidi:isolate;font-weight:800}
+.stars{font-size:3rem;letter-spacing:6px;text-align:center;margin:4px 0}
+.big{font-size:3rem;font-weight:800;text-align:center;line-height:1.1}
+.row{display:flex;gap:10px}
+.row button{flex:1}
+.stars em{font-style:normal;display:inline-block;animation:pop .55s both}
+@keyframes pop{0%{transform:scale(0) rotate(-40deg);opacity:0}70%{transform:scale(1.4) rotate(8deg)}100%{transform:scale(1);opacity:1}}
+@media (prefers-reduced-motion:reduce){.stars em{animation:none}}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<script>
+var $=function(s){return document.querySelector(s)};
+var app=$('#app');
+function gcd(a,b){return b?gcd(b,a%b):a}
+function lcm(a,b){return a/gcd(a,b)*b}
+function rnd(a,b){return a+Math.floor(Math.random()*(b-a+1))}
+function shuffle(x){for(var i=x.length-1;i>0;i--){var j=rnd(0,i),t=x[i];x[i]=x[j];x[j]=t}return x}
+function divs(n){var r=[];for(var i=1;i<=n;i++)if(n%i===0)r.push(i);return r}
+function mults(n,top){var r=[];for(var i=n;i<=top;i+=n)r.push(i);return r}
+function join(a){return a.join('، ')}
+
+var LEVELS=[{name:'سهل',hint:'للمبتدئين',g:[1,3],m:[2,5],cap:999},{name:'متوسط',hint:'أعداد أكبر',g:[2,6],m:[2,7],cap:999},{name:'متقدم',hint:'تحدٍّ أصعب',g:[2,9],m:[2,9],cap:999}];
+var state=null;
+function store(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
+function pick(a){return a[rnd(0,a.length-1)]}
+function S(x){return '<span>'+x+'</span>'}
+function fr(n,d){return n+'/'+d}
+function trim(x){return String(parseFloat(x.toFixed(8)))}
+function dh(n){return n<=10?n+' دراهم':n+' درهمًا'}
+function nm(n){return n<=10?n+' كراريس':n+' كراسًا'}
+function nums(){return '<div class="nums'+(arguments.length>2?' t':'')+'">'+[].map.call(arguments,function(x){return '<b>'+x+'</b>'}).join('')+'</div>'}
+function makePair(L){
+  for(var t=0;t<60;t++){
+    var g=rnd(L.g[0],L.g[1]),m=rnd(L.m[0],L.m[1]),n=rnd(L.m[0],L.m[1]);
+    if(m!==n&&gcd(m,n)===1&&g*m*n<=L.cap)return [g*m,g*n];
+  }
+  return [6,8];
+}
+function tMult(v){
+  if(v===2&&Math.random()<.5)return hMult();
+  var p=makePair(LEVELS[v]),a=p[0],b=p[1],l=lcm(a,b),g=gcd(a,b),r=Math.random(),t,ans,w,ex;
+  if(r<.35){
+    ans=g;w=[1,g*2,Math.min(a,b),g+1,l];
+    t='<div class="q">ما هو القاسم المشترك الأكبر (ق.م.أ) للعددين:</div>'+nums(a,b);
+    var da=divs(a),db=divs(b);
+    ex='<div>قواسم '+S(a)+': '+S(join(da))+'</div><div>قواسم '+S(b)+': '+S(join(db))+'</div><div>أكبر قاسم مشترك هو '+S(g)+'</div>';
+  }else{
+    ans=l;w=[a*b,Math.max(a,b),l*2,l+Math.min(a,b),a+b];
+    t=r<.7?'<div class="q">ما هو المضاعف المشترك الأصغر (م.م.أ) للعددين:</div>'+nums(a,b)
+      :'<div class="q">يرن جرس كل '+a+' دقائق، ويرن جرس آخر كل '+b+' دقيقة. إذا رنّا معًا الآن، فبعد كم دقيقة يرنّان معًا من جديد؟</div>';
+    ex='<div>مضاعفات '+S(a)+': '+S(join(mults(a,l)))+'</div><div>مضاعفات '+S(b)+': '+S(join(mults(b,l)))+'</div><div>أول مضاعف مشترك هو '+S(l)+'</div>';
+  }
+  return {t:t,ans:ans,w:w,ex:ex};
+}
+function tFrac(v){
+  if(v===2&&Math.random()<.5)return hFrac();
+  if(Math.random()<.5){
+    var p,q,g=rnd(2,3+v*2);
+    do{q=rnd(3,8+v*2);p=rnd(1,q-1)}while(gcd(p,q)>1);
+    return {t:'<div class="q">اختصر الكسر إلى أبسط صورة:</div>'+nums(fr(p*g,q*g)),ans:fr(p,q),
+      w:[fr(p,q+1),fr(p+1,q),fr(q,p),fr(p+g,q+g)],
+      ex:'<div>نقسم البسط '+S(p*g)+' والمقام '+S(q*g)+' على '+S(g)+'</div><div>فنجد '+S(fr(p,q))+'</div>'};
+  }
+  var d=rnd(6,10+v*3),n1=rnd(1,d-3),n2=rnd(1,d-1-n1),s=n1+n2;
+  return {t:'<div class="q">ما ناتج الجمع (دون اختصار)؟</div>'+nums(fr(n1,d)+' + '+fr(n2,d)),ans:fr(s,d),
+    w:[fr(s,d*2),fr(s+1,d),fr(Math.max(1,s-1),d),fr(n1*n2,d)],
+    ex:'<div>المقامان متساويان، فنجمع البسطين ونبقي المقام</div><div>'+S(n1+' + '+n2+' = '+s)+'، فالناتج '+S(fr(s,d))+'</div>'};
+}
+function tDec(v){
+  if(v===2&&Math.random()<.5)return hDec();
+  var dp=v>0?2:1,s=Math.pow(10,dp),k=s/10;
+  function f(x){return x.toFixed(dp)}
+  if(Math.random()<.5){
+    var a=rnd(15*k,95*k)/s,b=rnd(11*k,60*k)/s,sub=Math.random()<.5;
+    if(sub&&a<b){var x=a;a=b;b=x}
+    var r=Math.round((sub?a-b:a+b)*s)/s,op=sub?' − ':' + ';
+    return {t:'<div class="q">احسب الناتج:</div>'+nums(f(a)+op+f(b)),ans:f(r),
+      w:[f(r+1/s),f(Math.abs(r-1/s)),f(r+1),f(r*10)],
+      ex:'<div>نرتّب الفاصلة تحت الفاصلة ثم نحسب</div><div>'+S(f(a)+op+f(b)+' = '+f(r))+'</div>'};
+  }
+  var y=rnd(12*k,98*k)/s,m=pick([10,100,1000]),ans=trim(y*m);
+  return {t:'<div class="q">احسب الناتج:</div>'+nums(y+' × '+m),ans:ans,
+    w:[trim(y*m*10),trim(y*m/10),trim(y/m),trim(y*m+m)],
+    ex:'<div>عند الضرب في '+S(m)+' تنتقل الفاصلة '+(String(m).length-1)+' منازل إلى اليمين</div><div>'+S(y+' × '+m+' = '+ans)+'</div>'};
+}
+function tRatio(v){
+  if(v===2&&Math.random()<.5)return hRatio();
+  if(Math.random()<.5){
+    var u=rnd(2,6+v*3),k=rnd(3,6),n=rnd(k+1,k+8+v*4),ans=n*u;
+    return {t:'<div class="q">ثمن '+nm(k)+' '+dh(k*u)+'. فكم ثمن '+nm(n)+' بالسعر نفسه؟</div>',ans:ans,
+      w:[ans+u,ans-u,k*u+n,n+u],
+      ex:'<div>ثمن الكراس الواحد: '+S((k*u)+' ÷ '+k+' = '+u)+'</div><div>ثمن '+nm(n)+': '+S(n+' × '+u+' = '+ans)+'</div>'};
+  }
+  var p=pick([10,20,25,50]),n2=rnd(1,5+v*3)*20,a2=n2*p/100;
+  return {t:'<div class="q">ما هو '+p+' بالمئة من العدد '+n2+'؟</div>',ans:a2,
+    w:[a2*2,n2-a2,a2+10,Math.round(n2/p)],
+    ex:'<div>نقسم '+n2+' على 100 ثم نضرب في '+p+'</div><div>'+S(n2+' ÷ 100 × '+p+' = '+a2)+'</div>'};
+}
+function tArea(v){
+  if(v===2&&Math.random()<.5)return hArea();
+  var m=4+v*6,a=rnd(4,m+4),b=rnd(2,a-1),r=Math.random(),t,ans,w,ex;
+  if(r<.3){ans=a*b;w=[2*(a+b),a+b,a*b+a,a*b-b];t='مستطيل طوله '+a+' سم وعرضه '+b+' سم. ما مساحته بالسنتيمتر المربع؟';ex='<div>المساحة = الطول × العرض</div><div>'+S(a+' × '+b+' = '+ans)+'</div>'}
+  else if(r<.6){ans=2*(a+b);w=[a*b,a+b,2*a+b,a+2*b];t='مستطيل طوله '+a+' سم وعرضه '+b+' سم. ما محيطه بالسنتيمتر؟';ex='<div>المحيط = (الطول + العرض) × 2</div><div>'+S('('+a+' + '+b+') × 2 = '+ans)+'</div>'}
+  else if(r<.85){var base=2*rnd(2,5+v*3),h=rnd(3,8+v*3);ans=base*h/2;w=[base*h,base+h,ans+base,ans+h];t='مثلث قاعدته '+base+' سم وارتفاعه '+h+' سم. ما مساحته بالسنتيمتر المربع؟';ex='<div>المساحة = القاعدة × الارتفاع ÷ 2</div><div>'+S(base+' × '+h+' ÷ 2 = '+ans)+'</div>'}
+  else{var s=rnd(3,8+v*4);ans=s*s;w=[4*s,2*s,3*s,s*s+s];t='مربع طول ضلعه '+s+' سم. ما مساحته بالسنتيمتر المربع؟';ex='<div>المساحة = الضلع × الضلع</div><div>'+S(s+' × '+s+' = '+ans)+'</div>'}
+  return {t:'<div class="q">'+t+'</div>',ans:ans,w:w,ex:ex};
+}
+function hMult(){
+  var r=Math.random();
+  if(r<.34){
+    var tri=pick([[4,6,10],[6,8,12],[3,4,6],[5,6,15],[4,10,15],[6,9,12],[8,12,18],[10,12,15],[6,10,15],[9,12,18]]);
+    var a=tri[0],b=tri[1],c=tri[2],l2=lcm(a,b),l=lcm(l2,c);
+    return {t:'<div class="q">ما هو المضاعف المشترك الأصغر (م.م.أ) للأعداد الثلاثة:</div>'+nums(a,b,c),ans:l,
+      w:[a*b*c,l*2,l2,Math.max(a,b,c)*2],
+      ex:'<div>م.م.أ للعددين '+S(a+'، '+b)+' هو '+S(l2)+'</div><div>م.م.أ للعددين '+S(l2+'، '+c)+' هو '+S(l)+'</div>'};
+  }
+  var p=makePair({g:[3,9],m:[5,9],cap:999}),x=p[0],y=p[1],g=gcd(x,y),m=lcm(x,y);
+  if(r<.67)return {t:'<div class="q">عند خالد '+x+' كرة حمراء و'+y+' كرة زرقاء، ويريد توزيعها على أكبر عدد ممكن من الأكياس بحيث يحتوي كل كيس على العدد نفسه من كل لون. كم كيسًا يلزمه؟</div>',ans:g,
+    w:[1,g*2,Math.min(x,y),g+1,m],
+    ex:'<div>نبحث عن أكبر عدد يقسم '+S(x)+' و'+S(y)+'</div><div>قواسم '+S(x)+': '+S(join(divs(x)))+'</div><div>قواسم '+S(y)+': '+S(join(divs(y)))+'</div><div>أكبر قاسم مشترك هو '+S(g)+'</div>'};
+  return {t:'<div class="q">ما هو المضاعف المشترك الأصغر (م.م.أ) للعددين:</div>'+nums(x,y),ans:m,
+    w:[x*y,Math.max(x,y),m*2,m+Math.min(x,y)],
+    ex:'<div>مضاعفات '+S(x)+': '+S(join(mults(x,m)))+'</div><div>مضاعفات '+S(y)+': '+S(join(mults(y,m)))+'</div><div>أول مضاعف مشترك هو '+S(m)+'</div>'};
+}
+function hFrac(){
+  var d=pick([4,5,6,8,10,12]),k=pick([2,3]),d2=d*k,n1=rnd(1,d-1),n2=rnd(1,d2-1),sub=Math.random()<.4;
+  if(sub&&n1*k<=n2){n1=d-1;n2=rnd(1,n1*k-1)}
+  var u=n1*k,s=sub?u-n2:u+n2,op=sub?' − ':' + ';
+  return {t:'<div class="q">'+(sub?'ما ناتج الطرح (دون اختصار)؟':'ما ناتج الجمع (دون اختصار)؟')+'</div>'+nums(fr(n1,d)+op+fr(n2,d2)),ans:fr(s,d2),
+    w:[fr(sub?Math.abs(n1-n2):n1+n2,sub?Math.abs(d-d2):d+d2),fr(s,d),fr(s+1,d2),fr(Math.max(1,s-1),d2)],
+    ex:'<div>نوحّد المقامين: '+S(fr(n1,d)+' = '+fr(u,d2))+'</div><div>ثم نحسب: '+S(u+op+n2+' = '+s)+'، فالناتج '+S(fr(s,d2))+'</div>'};
+}
+function hDec(){
+  if(Math.random()<.5){
+    var a=rnd(11,59)/10,b=rnd(11,39)/10,ans=trim(Math.round(a*b*100)/100);
+    return {t:'<div class="q">احسب الناتج:</div>'+nums(a+' × '+b),ans:ans,
+      w:[trim(a*b*10),trim(a*b/10),trim(a+b),trim(a*b+1)],
+      ex:'<div>نضرب دون فاصلة: '+S(Math.round(a*10)+' × '+Math.round(b*10)+' = '+Math.round(a*10)*Math.round(b*10))+'</div><div>ثم نضع الفاصلة بعد منزلتين: '+S(ans)+'</div>'};
+  }
+  var q=rnd(2,9),res=rnd(11,59)/10,x=Math.round(res*q*100)/100;
+  return {t:'<div class="q">احسب الناتج:</div>'+nums(x+' ÷ '+q),ans:trim(res),
+    w:[trim(res*10),trim(res/10),trim(res+1),trim(res+.1)],
+    ex:'<div>نقسم كما نقسم الأعداد الصحيحة ونضع الفاصلة في مكانها</div><div>'+S(x+' ÷ '+q+' = '+trim(res))+'</div>'};
+}
+function hRatio(){
+  var n=rnd(2,10)*20,p=pick([10,15,25,30,40]),ds=n*p/100,ans=n-ds;
+  return {t:'<div class="q">ثمن سلعة '+dh(n)+'، وأعلن التاجر تخفيضًا قدره '+p+' بالمئة. ما ثمنها بعد التخفيض؟</div>',ans:ans,
+    w:[ds,n+ds,n-p,ans+10],
+    ex:'<div>مقدار التخفيض: '+S(n+' ÷ 100 × '+p+' = '+ds)+'</div><div>الثمن الجديد: '+S(n+' − '+ds+' = '+ans)+'</div>'};
+}
+function hArea(){
+  var wd=rnd(5,12),L=wd+rnd(2,8),P=2*(L+wd),ans=L*wd;
+  return {t:'<div class="q">محيط مستطيل '+P+' سم وطوله '+L+' سم. ما مساحته بالسنتيمتر المربع؟</div>',ans:ans,
+    w:[L*(P/2),P*L,ans+L,ans-wd],
+    ex:'<div>نصف المحيط: '+S(P+' ÷ 2 = '+(P/2))+'</div><div>العرض: '+S((P/2)+' − '+L+' = '+wd)+'</div><div>المساحة: '+S(L+' × '+wd+' = '+ans)+'</div>'};
+}
+var TOPICS=[{n:'المضاعف والقاسم المشتركان',g:tMult},{n:'الكسور',g:tFrac},{n:'الأعداد العشرية',g:tDec},{n:'النسبة والنسبة المئوية',g:tRatio},{n:'المساحة والمحيط',g:tArea}];
+function alt(a,k){a=String(a);if(a.indexOf('/')>0){var s=a.split('/');return (+s[0]+k)+'/'+s[1]}return String(+a+k)}
+function build(q){
+  var seen={},o=[String(q.ans)];seen[o[0]]=1;
+  q.w.forEach(function(x){x=String(x);if(!seen[x]&&parseFloat(x)>0&&o.length<4){seen[x]=1;o.push(x)}});
+  for(var k=1;o.length<4&&k<60;k++){var c=alt(q.ans,k);if(!seen[c]&&parseFloat(c)>0){seen[c]=1;o.push(c)}}
+  q.opts=shuffle(o);q.ans=String(q.ans);return q;
+}
+function topicKey(t){return 'nj-b'+t}
+function home(){
+  var h='<h1>رحلة الأعداد</h1><p>اختر محطة، ثم مستواك. عشرة أسئلة في كل جولة، ويظهر الحل بعد كل إجابة.</p><div class="lv">';
+  TOPICS.forEach(function(T,i){var b=store(topicKey(i));h+='<button data-t="'+i+'"><span>'+T.n+'</span><small>'+(b?'أفضل: '+b:'')+'</small></button>'});
+  var bm=store(topicKey(-1));
+  h+='<button class="go" data-t="-1"><span>تحدٍّ مختلط</span><small>'+(bm?'أفضل: '+bm:'من كل المحطات')+'</small></button></div>'+
+     '<div style="margin-top:16px"><button id="snd"></button></div><p style="text-align:center;margin-top:24px;font-weight:800">من إعداد: محمد شلفي</p>';
+  app.innerHTML=h;
+  var sb=$('#snd');
+  function lab(){sb.textContent=store('nj-snd')==='0'?'🔇 الصوت: متوقف':'🔊 الصوت: يعمل'}
+  lab();
+  sb.onclick=function(){store('nj-snd',store('nj-snd')==='0'?'1':'0');lab()};
+  app.querySelectorAll('[data-t]').forEach(function(b){b.onclick=function(){levels(+b.dataset.t)}});
+}
+function levels(t){
+  var h='<h2>'+(t<0?'تحدٍّ مختلط':TOPICS[t].n)+'</h2><p>اختر المستوى.</p><div class="lv">';
+  LEVELS.forEach(function(L,i){h+='<button data-l="'+i+'"><span>'+L.name+'</span><small>'+L.hint+'</small></button>'});
+  h+='</div><div style="margin-top:14px"><button id="bk">رجوع إلى المحطات</button></div>';
+  app.innerHTML=h;
+  app.querySelectorAll('[data-l]').forEach(function(b){b.onclick=function(){start(t,+b.dataset.l)}});
+  $('#bk').onclick=home;
+}
+function start(t,i){state={t:t,v:i,ok:0,score:0,streak:0,res:[],q:null};next()}
+function bar(){
+  var h='<div class="bar">';
+  for(var k=0;k<10;k++){var c=k<state.res.length?(state.res[k]?'on':'off'):(k===state.res.length?'cur':'');h+='<i class="'+c+'"></i>'}
+  return h+'</div>';
+}
+function next(){
+  if(state.res.length>=10)return finish();
+  var T=state.t<0?pick(TOPICS):TOPICS[state.t];
+  var q=state.q=build(T.g(state.v));q.done=false;
+  var h=bar()+'<div class="top"><span>السؤال '+(state.res.length+1)+' من 10</span><span>النقاط: '+state.score+'</span></div><div class="card">'+q.t+'</div><div class="opts">';
+  q.opts.forEach(function(o){h+='<button data-v="'+o+'">'+o+'</button>'});
+  h+='</div><div id="fb"></div>';
+  app.innerHTML=h;
+  app.querySelectorAll('[data-v]').forEach(function(b){b.onclick=function(){answer(b)}});
+}
+function answer(btn){
+  var q=state.q;if(q.done)return;q.done=true;
+  var good=btn.dataset.v===q.ans;
+  app.querySelectorAll('[data-v]').forEach(function(b){b.disabled=true;if(b.dataset.v===q.ans)b.classList.add('right')});
+  if(!good)btn.classList.add('wrong');
+  state.res.push(good);
+  if(good){state.ok++;state.streak++;state.score+=10+(state.streak>=3?5:0)}else state.streak=0;
+  var last=state.res.length>=10;
+  var msg=good?(state.streak>=3?'أحسنت! '+state.streak+' إجابات صحيحة متتالية':'إجابة صحيحة'):'الإجابة الصحيحة هي '+q.ans;
+  $('#fb').innerHTML='<div class="fb '+(good?'ok':'no')+'"><strong>'+msg+'</strong>'+q.ex+'</div><button class="go" id="nx">'+(last?'عرض النتيجة':'السؤال التالي')+'</button>';
+  $('#nx').onclick=next;
+  $('#nx').scrollIntoView({block:'nearest'});
+}
+function clap(n){
+  try{
+    var C=window.AudioContext||window.webkitAudioContext;
+    if(!C||!n||store('nj-snd')==='0')return;
+    var ac=new C(),len=Math.floor(ac.sampleRate*.08),buf=ac.createBuffer(1,len,ac.sampleRate),d=buf.getChannelData(0);
+    for(var i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,3);
+    for(var k=0;k<n;k++){
+      var s=ac.createBufferSource(),g=ac.createGain(),f=ac.createBiquadFilter();
+      s.buffer=buf;g.gain.value=.45;f.type='bandpass';f.frequency.value=1400+Math.random()*1800;
+      s.connect(f);f.connect(g);g.connect(ac.destination);
+      s.start(ac.currentTime+k*.09+Math.random()*.06);
+    }
+  }catch(e){}
+}
+function celebrate(stars){
+  var n=[14,40,80,130][stars];
+  if(!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)){
+    var c=document.createElement('canvas');
+    c.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:50';
+    document.body.appendChild(c);
+    var W=c.width=window.innerWidth,H=c.height=window.innerHeight,x=c.getContext('2d'),cols=['#ffc83d','#ff6b6b','#2fb67c','#4da3ff','#b377ff'],P=[];
+    for(var i=0;i<n;i++)P.push({x:Math.random()*W,y:-20-Math.random()*H*.6,vx:(Math.random()-.5)*3,vy:2+Math.random()*3.5,r:Math.random()*6.28,vr:(Math.random()-.5)*.25,s:9+Math.random()*11,star:Math.random()<.55,c:cols[i%5]});
+    var t0=Date.now();
+    (function f(){
+      var t=Date.now()-t0;
+      x.clearRect(0,0,W,H);
+      x.globalAlpha=t>3500?Math.max(0,1-(t-3500)/800):1;
+      P.forEach(function(p){
+        p.x+=p.vx;p.y+=p.vy;p.r+=p.vr;
+        x.save();x.translate(p.x,p.y);x.rotate(p.r);x.fillStyle=p.c;
+        if(p.star){x.beginPath();for(var k=0;k<10;k++){var a=k*Math.PI/5,rr=k%2?p.s*.45:p.s;x.lineTo(Math.cos(a)*rr,Math.sin(a)*rr)}x.closePath();x.fill()}
+        else x.fillRect(-p.s/3,-p.s/2,p.s*.66,p.s);
+        x.restore();
+      });
+      if(t<4300)requestAnimationFrame(f);else c.remove();
+    })();
+  }
+  clap([0,8,16,26][stars]);
+}
+function finish(){
+  var s=state.ok,stars=s>=9?3:s>=6?2:s>=3?1:0;
+  var msg=['لا بأس، حاول مرة أخرى وراجع الشرح بعد كل سؤال.','بداية جيدة، ستتحسن مع التدريب.','أداء جيد جدًا.','ممتاز! أنت بطل الأعداد.'][stars];
+  var best=+store(topicKey(state.t))||0,isBest=state.score>best;
+  if(isBest)store(topicKey(state.t),String(state.score));
+  var st='';for(var k=0;k<3;k++)st+='<em style="animation-delay:'+(k*.25)+'s">'+(k<stars?'★':'☆')+'</em>';
+  app.innerHTML='<h2>انتهت الجولة</h2><div class="card"><div class="stars" style="color:var(--sun)">'+st+'</div><div class="big">'+s+' / 10</div><p style="text-align:center;margin-top:8px">'+state.score+' نقطة'+(isBest?' — رقم قياسي جديد':'')+'</p><p style="text-align:center;color:var(--ink);font-weight:800">'+msg+'</p></div>'+
+   '<div class="row"><button class="go" id="again">العب مرة أخرى</button><button id="hm">المحطات</button></div><p style="text-align:center;margin-top:24px;font-weight:800">من إعداد: محمد شلفي</p>';
+  $('#again').onclick=function(){start(state.t,state.v)};
+  $('#hm').onclick=home;
+  celebrate(stars);
+}
+home();
+</script>
+</body>
+</html>
